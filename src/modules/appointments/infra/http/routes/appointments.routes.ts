@@ -1,4 +1,5 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
+import { celebrate, Segments, Joi } from 'celebrate';
 
 import ensureAuthenticated from '@module/users/infra/http/middlewares/ensureAuthenticated';
 
@@ -11,13 +12,16 @@ const providerAppointmentController = new ProviderAppointmentsController();
 
 appointmentsRouter.use(ensureAuthenticated);
 
-// appointmentsRouter.get('/', async (request: Request, response: Response) => {
-//   const appointments = await appointmentsRepository.find();
-
-//   return response.json(appointments);
-// });
-
-appointmentsRouter.post('/', appointmentsController.create);
+appointmentsRouter.post(
+  '/',
+  celebrate({
+    [Segments.BODY]: {
+      provider_id: Joi.string().uuid().required(),
+      date: Joi.date(),
+    },
+  }),
+  appointmentsController.create,
+);
 appointmentsRouter.get('/me', providerAppointmentController.index);
 
 export default appointmentsRouter;
